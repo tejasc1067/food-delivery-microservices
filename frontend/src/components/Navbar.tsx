@@ -114,13 +114,13 @@ export default function Navbar() {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <Link href="/" style={{ color: 'var(--muted)', fontSize: '0.95rem', fontWeight: 500, transition: 'color 0.2s' }}>
+        <Link href="/" style={{ color: pathname === '/' ? 'var(--accent)' : 'var(--muted)', fontSize: '0.95rem', fontWeight: pathname === '/' ? 700 : 500, transition: 'all 0.2s' }}>
           Home
         </Link>
 
         {!isAdmin && (
           <>
-            <Link href="/cart" style={{ position: 'relative', color: 'var(--muted)', fontSize: '0.95rem', fontWeight: 500 }}>
+            <Link href="/cart" style={{ position: 'relative', color: pathname === '/cart' ? 'var(--accent)' : 'var(--muted)', fontSize: '0.95rem', fontWeight: pathname === '/cart' ? 700 : 500, transition: 'all 0.2s' }}>
               🛒 Cart
               {itemCount > 0 && (
                 <span style={{
@@ -143,7 +143,7 @@ export default function Navbar() {
               )}
             </Link>
             {isAuthenticated && (
-              <Link href="/orders" style={{ color: 'var(--muted)', fontSize: '0.95rem', fontWeight: 500 }}>
+              <Link href="/orders" style={{ color: pathname === '/orders' ? 'var(--accent)' : 'var(--muted)', fontSize: '0.95rem', fontWeight: pathname === '/orders' ? 700 : 500, transition: 'all 0.2s' }}>
                 Orders
               </Link>
             )}
