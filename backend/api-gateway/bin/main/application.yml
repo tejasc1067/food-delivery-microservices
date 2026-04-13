@@ -23,6 +23,16 @@ spring:
           uri: lb://restaurant-service
           predicates:
             - Path=/api/restaurants/**,/api/menu-items/**
+          filters:
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE
+                methods: GET
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
+                  factor: 2
 
         - id: order-service
           uri: lb://order-service
@@ -35,7 +45,12 @@ spring:
             - Path=/api/payments/**
 
 eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
   client:
+    registry-fetch-interval-seconds: 5
+    initial-instance-info-replication-interval-seconds: 5
     service-url:
       defaultZone: http://eureka:eureka@localhost:8761/eureka/
 

@@ -50,6 +50,7 @@ eureka:
     lease-expiration-duration-in-seconds: 15
   client:
     registry-fetch-interval-seconds: 5
+    initial-instance-info-replication-interval-seconds: 5
     service-url:
       defaultZone: http://eureka:eureka@localhost:8761/eureka/
 
