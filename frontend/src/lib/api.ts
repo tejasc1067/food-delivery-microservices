@@ -1,4 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE = typeof window === 'undefined'
+  ? (process.env.INTERNAL_API_URL || 'http://api-gateway:8080')  // SSR: call gateway directly
+  : '';  // Browser: relative path, handled by nginx or next.config rewrites
 
 interface RequestOptions extends RequestInit {
   token?: string;
