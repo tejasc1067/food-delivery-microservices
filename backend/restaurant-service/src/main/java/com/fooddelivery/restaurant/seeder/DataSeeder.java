@@ -6,6 +6,7 @@ import com.fooddelivery.restaurant.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -155,6 +156,7 @@ public class DataSeeder implements CommandLineRunner {
     private int imgIdx = 0;
     private final Random random = new Random(42); // specific seed for pseudo-consistency
 
+    @Async
     @Override
     @Transactional
     public void run(String... args) {

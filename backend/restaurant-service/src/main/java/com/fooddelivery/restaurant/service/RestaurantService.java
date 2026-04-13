@@ -5,6 +5,8 @@ import com.fooddelivery.restaurant.entity.Restaurant;
 import com.fooddelivery.restaurant.exception.ResourceNotFoundException;
 import com.fooddelivery.restaurant.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,10 +30,9 @@ public class RestaurantService {
         return toResponse(restaurant);
     }
 
-    public List<RestaurantResponse> searchRestaurants(String query, String city, BigDecimal rating, String cuisine) {
-        return restaurantRepository.search(query, city, rating, cuisine).stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<RestaurantResponse> searchRestaurants(String query, String city, BigDecimal rating, String cuisine, Pageable pageable) {
+        return restaurantRepository.search(query, city, rating, cuisine, pageable)
+                .map(this::toResponse);
     }
 
     public RestaurantResponse createRestaurant(RestaurantRequest request) {
