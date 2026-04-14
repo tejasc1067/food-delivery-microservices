@@ -29,8 +29,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('foodie_location', loc);
   };
 
-  // Avoid hydration layout shift by just using state directly. It might cause a tiny 
-  // server/client text mismatch on first render but it functions perfectly.
+
 
   return (
     <LocationContext.Provider value={{ location: mounted ? location : "Pandharpur", setLocation, locations: LOCATIONS }}>

@@ -55,8 +55,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Location Dropdown */}
-        {pathname === '/' && ( // Only show on homepage to act like Swiggy
+        {pathname === '/' && (
+
           <div ref={dropdownRef} style={{ position: 'relative' }}>
             <div 
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: 'var(--muted)', fontWeight: 600, fontSize: '0.95rem' }}

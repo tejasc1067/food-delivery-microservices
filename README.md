@@ -1,14 +1,17 @@
-# 🍔 FoodieExpress — Microservices Food Delivery Platform
+# FoodieExpress — Microservices Food Delivery Platform
 
-A production-ready, highly scalable food delivery web application built entirely on a microservices architecture. It features a complete guest-to-authenticated checkout flow, resilient inter-service communication, and dynamically generates over 10,000 localized food items across 10 major cities.
+A food delivery application built using microservices. It handles the full flow from browsing as a guest to placing an order as a logged-in user. The system uses localized data across 10 cities.
 
-## 🏗️ Architecture Design
+## Architecture Design
 
-The backend is built around **Spring Cloud**, using a centralized API Gateway that routes traffic to specialized domains. Each service is entirely stateless, utilizing Eureka for dynamic discovery, and strictly manages its own isolated database to prevent coupling.
+The backend uses **Spring Cloud** with an API Gateway that routes requests to specific services. Each service handles its own domain and database to keep them independent.
 
 ```mermaid
 graph TD;
-    Client([🌍 Web Client - Next.js : 3000]) --> Gateway[🛡️ API Gateway : 8080];
+    Client([Web Client - Next.js : 3000]) --> Nginx[Nginx Reverse Proxy : 80];
+    Nginx --> Client;
+    Nginx --> Gateway[API Gateway : 8080];
+    Nginx --> Client;
     
     subgraph Microservices Cluster
         Gateway --> Auth[Auth Service : 8081];
@@ -16,15 +19,13 @@ graph TD;
         Gateway --> Order[Order Service : 8083];
         Gateway --> Pay[Payment Service : 8084];
         
-        %% Service Discovery
-        Auth -.-> Eureka((📡 Eureka Discovery Server : 8761));
+        Auth -.-> Eureka((Eureka Discovery Server : 8761));
         Rest -.-> Eureka;
         Order -.-> Eureka;
         Pay -.-> Eureka;
         Gateway -.-> Eureka;
         
-        %% Inter-service communication
-        Order -- "Feign Client (Resilience4j Retry/Fallbacks)" --> Rest;
+        Order -- "Feign Client" --> Rest;
         Order -- "Feign Client" --> Pay;
     end
     
@@ -36,64 +37,154 @@ graph TD;
     end
 ```
 
-## 🔌 Service Port Map
+## Project Structure
 
-The application consists of 6 core Java services, 1 Node frontend, and 1 Database container. 
+```
+food-delivery-microservices/
+├── docker-compose.yml
+├── docker/
+│   ├── init-db.sh
+│   └── nginx.conf
+│
+├── backend/
+│   ├── discovery-server/          ← Service Registry
+│   │   └── src/main/java/.../discovery/
+│   │       ├── DiscoveryServerApplication.java
+│   │       └── config/SecurityConfig.java
+│   │
+│   ├── api-gateway/               ← Gateway + JWT Filter
+│   │   └── src/main/java/.../gateway/
+│   │       ├── ApiGatewayApplication.java
+│   │       ├── config/SecurityConfig.java
+│   │       └── filter/JwtAuthFilter.java
+│   │
+│   ├── auth-service/              ← User Management + JWT
+│   │   └── src/main/java/.../auth/
+│   │       ├── AuthServiceApplication.java
+│   │       ├── controller/AuthController.java
+│   │       ├── dto/ (LoginRequest, RegisterRequest, AuthResponse)
+│   │       ├── entity/User.java
+│   │       ├── repository/UserRepository.java
+│   │       ├── security/ (JwtUtil, SecurityConfig)
+│   │       ├── seeder/AdminSeeder.java
+│   │       └── service/AuthService.java
+│   │
+│   ├── restaurant-service/        ← Restaurants + Menus
+│   │   └── src/main/java/.../restaurant/
+│   │       ├── RestaurantServiceApplication.java
+│   │       ├── controller/ (RestaurantController, MenuItemController)
+│   │       ├── dto/ (RestaurantRequest/Response, MenuItemRequest/Response)
+│   │       ├── entity/ (Restaurant, MenuItem)
+│   │       ├── exception/ (GlobalExceptionHandler, ResourceNotFoundException)
+│   │       ├── repository/ (RestaurantRepository, MenuItemRepository)
+│   │       ├── seeder/DataSeeder.java
+│   │       └── service/ (RestaurantService, MenuItemService)
+│   │
+│   ├── order-service/             ← Orders
+│   │   └── src/main/java/.../order/
+│   │       ├── OrderServiceApplication.java
+│   │       ├── client/ (RestaurantClient, PaymentClient)
+│   │       ├── controller/OrderController.java
+│   │       ├── dto/ (OrderRequest/Response, OrderItemRequest/Response, ...)
+│   │       ├── entity/ (Order, OrderItem, OrderStatus)
+│   │       ├── exception/ (GlobalExceptionHandler, ResourceNotFoundException)
+│   │       ├── repository/OrderRepository.java
+│   │       └── service/OrderService.java
+│   │
+│   └── payment-service/           ← Payments
+│       └── src/main/java/.../payment/
+│           ├── PaymentServiceApplication.java
+│           ├── controller/PaymentController.java
+│           ├── dto/ (PaymentRequest, PaymentResponse)
+│           ├── entity/ (Payment, PaymentStatus)
+│           ├── exception/GlobalExceptionHandler.java
+│           ├── repository/PaymentRepository.java
+│           └── service/PaymentService.java
+│
+└── frontend/                      ← Next.js App
+    └── src/
+        ├── app/
+        │   ├── layout.tsx
+        │   ├── page.tsx                      (Home)
+        │   ├── globals.css
+        │   ├── login/page.tsx
+        │   ├── register/page.tsx
+        │   ├── restaurant/[id]/page.tsx      (Restaurant details)
+        │   ├── cart/page.tsx
+        │   ├── checkout/page.tsx
+        │   ├── orders/page.tsx
+        │   └── admin/
+        │       ├── page.tsx                  (Dashboard)
+        │       └── restaurant/[id]/page.tsx  (Edit Restaurant)
+        ├── components/
+        │   └── Navbar.tsx
+        ├── context/
+        │   ├── AuthContext.tsx
+        │   ├── CartContext.tsx
+        │   └── LocationContext.tsx
+        └── lib/
+            ├── api.ts
+            └── types.ts
+```
 
-| Component | Port | Internal Name | Description |
+## Service Port Map
+
+The application consists of 6 core Java services, 1 frontend, 1 Nginx proxy, and a Database.
+
+| Component | Port | Container Name | Description |
 |-----------|------|---------------|-------------|
-| **Frontend UI** | `3000` | `foodie-frontend` | Next.js 15 React web app handling all user views. |
-| **API Gateway** | `8080` | `api-gateway` | The singular entry point. Validates JWTs, handles CORS, and routes traffic. |
-| **Auth Service** | `8081` | `auth-service` | Handles User Registration, Login, and generates JWT tokens. |
-| **Restaurant Service** | `8082` | `restaurant-service` | Exposes catalog, natively seeds 10,000 items, manages restaurants. |
-| **Order Service** | `8083` | `order-service` | Order placement, cart-to-order logic, orchestration. |
-| **Payment Service** | `8084` | `payment-service` | Simulated gateway that validates payment structures. |
-| **Eureka Server** | `8761` | `discovery-server` | Service registry so microservices can locate each other. |
-| **PostgreSQL** | `5432` | `foodie-postgres` | Hosts 4 highly isolated logical databases. |
+| **Nginx Proxy** | `80` | `foodie-nginx` | Routes requests to the gateway or frontend. |
+| **Frontend UI** | `3000` | `foodie-frontend` | Next.js app for the user interface. |
+| **API Gateway** | `8080` | `foodie-gateway` | Entry point that validates JWTs and routes traffic. |
+| **Auth Service** | `8081` | `foodie-auth` | User account and login handling. |
+| **Restaurant Service** | `8082` | `foodie-restaurant` | Manages restaurant and menu data. |
+| **Order Service** | `8083` | `foodie-order` | Manages orders and cart logic. |
+| **Payment Service** | `8084` | `foodie-payment` | Simulates payment processing. |
+| **Eureka Server** | `8761` | `foodie-discovery` | Registry for service instances. |
+| **PostgreSQL** | `5432` | `foodie-postgres` | Postgres with separate databases for each service. |
 
 ---
 
-## ⚡ Quick Start (Dockerized)
+## Quick Start
 
-The absolute fastest way to boot the entire platform with all 8 containers mapped perfectly together:
+Start the entire platform using Docker:
 
 ```bash
 docker-compose up --build -d
 ```
-*(On first execution, the `restaurant-service` will take a few seconds upon startup to algorithmically generate 1,000 restaurants and 9,000 menu items. Please wait for the logs to clear).*
+*(On first run, the `restaurant-service` takes a moment to generate the initial data for restaurants and menu items).*
 
-➡ **Open the Web App:** [http://localhost:3000](http://localhost:3000)
+**Open the Web App:** [http://localhost](http://localhost)
 
-## 💻 Manual Local Development
+## Manual Setup
 
-If you prefer to run the components independently for development and debugging:
+To run components individually:
 
 ### 1. Requirements
 - Java 21
 - Node.js 22
-- PostgreSQL 17 (Running on localhost:5432 with username: `postgres`, password: `postgres`)
+- PostgreSQL 17 (Running on localhost:5432)
 - Gradle 8.12
 
-### 2. Booting the Java Microservices
-You **must** start the Discovery Server first, followed by the domain services, and the API Gateway last. Open multiple terminals and run:
+### 2. Run Backend Services
+Start the Discovery Server first, then the other services, and the API Gateway last.
 
 ```bash
-# Terminal 1
+# Start Eureka
 cd backend/discovery-server && ./gradlew bootRun
 
-# Terminal 2, 3, 4, 5
+# Start services
 cd backend/auth-service && ./gradlew bootRun
 cd backend/restaurant-service && ./gradlew bootRun
 cd backend/order-service && ./gradlew bootRun
 cd backend/payment-service && ./gradlew bootRun
 
-# Terminal 6
+# Start Gateway
 cd backend/api-gateway && ./gradlew bootRun
 ```
 
-### 3. Booting the Next.js Frontend
+### 3. Run Frontend
 ```bash
-# Terminal 7
 cd frontend
 npm install
 npm run dev
@@ -101,28 +192,59 @@ npm run dev
 
 ---
 
-## 🚀 Features
+## Features
 
 ### **Guest / User Experience**
-- **Location Context:** Seamlessly browse catalogs specific to 10 mapped cities in Maharashtra (Mumbai, Pune, Nashik, etc).
-- **Persistent Unauthenticated Cart:** Users can browse 10,000+ items, build large carts using dynamic `+` and `-` pill controls, and see live pricing without creating an account.
-- **Smart Checkout Redirection:** Visitors are only gated and prompted to log in at the final checkout stage, immediately redirecting back to their cart upon success (Swiggy/Zomato style).
-- **Tracking:** View your historical placed, confirming, and delivered orders.
+- **Location:** Browse restaurants based on the selected city.
+- **Cart:** Add items to your cart without being logged in. Controls allow increasing or decreasing quantities.
+- **Checkout:** Users are prompted to log in only at the final checkout step.
+- **Tracking:** View your order history and status.
 
-### **Admin Dashboard**
-- Create, Read, Update, and Delete actions for Restaurants and Menu Items.
-- View global system orders.
+### **Admin Tools**
+- Manage restaurants and menu items.
+- View system orders.
 
-## 🔐 Default Test Credentials
+## Credentials
 
-| Role | Email | Password | Access |
-|------|-------|----------|--------|
-| **Admin** | `admin@foodie.com` | `admin123` | Dashboard access, bypasses cart mechanics. |
-| **User** | (Create one!) | - | End-to-end shopping & ordering pipeline. |
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@foodie.com` | `admin123` |
+| **User** | (Create one!) | - |
 
-## 🛠️ Technical Highlights
+## Technical Details
 
-*   **Resilience4j Circuit Breakers:** The `OrderService` wraps its synchronous `RestaurantService` HTTP checks in a `@CircuitBreaker` and `@Retry` mechanism. If the target service fails/lags, the order service gracefully falls back instead of halting or propagating crashes.
-*   **Centralized JWT Authentication:** Tokens aren't painfully validated in every single microservice. The `api-gateway` intercepts all secure routes, verifies the JWT natively, and forwards trusted traffic downstream by appending a hardcoded `X-User-Id` header.
-*   **Next.js 15 App Router:** Heavy contextual state management (`LocationProvider`, `CartProvider`) bypassing React hydration mismatches on client mount, paired with ultra-responsive global state UI elements (Floating Banners).
-*   **Isolated Data Architecture:** 4 logically split databases enforcing strict domain-driven-design parameters. 
+*   **Resilience:** `OrderService` uses retries when calling other services.
+*   **Security:** `api-gateway` checks JWT tokens and adds user information to the headers for downstream services.
+*   **State Management:** The frontend uses React context to manage location, cart, and authentication.
+*   **Data:** Separate databases are used for each service to maintain independence.
+
+## API Endpoints
+
+### Restaurant Service
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/restaurants` | Get all restaurants |
+| `GET` | `/api/restaurants/city/{city}` | Get restaurants filtered by city |
+| `GET` | `/api/restaurants/{id}` | Get restaurant by ID |
+| `POST` | `/api/restaurants` | Create a restaurant |
+| `PUT` | `/api/restaurants/{id}` | Update a restaurant |
+| `DELETE` | `/api/restaurants/{id}` | Delete a restaurant |
+| `GET` | `/api/menu-items/restaurant/{id}` | Get menu items for a restaurant |
+
+### Auth Service
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/register` | Register a new user |
+| `POST` | `/api/auth/login` | Login and receive JWT |
+
+### Order Service
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/orders` | Place a new order |
+| `GET` | `/api/orders` | Get orders for authenticated user |
+
+### Payment Service
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/payments` | Process a payment |
+

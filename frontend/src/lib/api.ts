@@ -1,6 +1,6 @@
 const API_BASE = typeof window === 'undefined'
-  ? (process.env.INTERNAL_API_URL || 'http://api-gateway:8080')  // SSR: call gateway directly
-  : '';  // Browser: relative path, handled by nginx or next.config rewrites
+  ? (process.env.INTERNAL_API_URL || 'http://api-gateway:8080')
+  : '';
 
 interface RequestOptions extends RequestInit {
   token?: string;

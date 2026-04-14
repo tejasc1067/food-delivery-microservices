@@ -53,7 +53,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem', paddingBottom: '6rem' }}>
-      {/* Header */}
+
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ position: 'relative', borderRadius: '1.5rem', overflow: 'hidden', marginBottom: '2.5rem', height: '300px' }}>
         <img src={restaurant.imageUrl} alt={restaurant.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }} />
@@ -68,7 +68,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
         </div>
       </motion.div>
 
-      {/* Menu */}
+
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Menu ({menuItems.length} items)</h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
@@ -134,7 +134,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
         ))}
       </div>
 
-      {/* Floating View Cart Banner */}
+
       {cartItemsCount > 0 && !isAdmin && (
         <motion.div
           initial={{ y: 100, opacity: 0, x: '-50%' }}

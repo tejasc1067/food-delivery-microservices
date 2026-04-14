@@ -154,7 +154,7 @@ public class DataSeeder implements CommandLineRunner {
     };
 
     private int imgIdx = 0;
-    private final Random random = new Random(42); // specific seed for pseudo-consistency
+    private final Random random = new Random(42);
 
     @Async
     @Override
@@ -175,11 +175,11 @@ public class DataSeeder implements CommandLineRunner {
             for (int i = 0; i < 100; i++) {
                 String name = ADJS[random.nextInt(ADJS.length)] + " " + NOUNS[random.nextInt(NOUNS.length)];
                 if (i % 5 == 0) {
-                    name += " " + (i + 1); // Ensures variety
+                    name += " " + (i + 1);
                 }
                 
                 String cuisine = CUISINES[random.nextInt(CUISINES.length)];
-                double rawRating = 3.5 + (random.nextDouble() * 1.4); // Rating 3.5 to 4.9
+                double rawRating = 3.5 + (random.nextDouble() * 1.4);
                 BigDecimal rating = new BigDecimal(rawRating).setScale(1, RoundingMode.HALF_UP);
                 
                 Restaurant restaurant = Restaurant.builder()
@@ -195,7 +195,7 @@ public class DataSeeder implements CommandLineRunner {
                 List<MenuItem> menuItems = new ArrayList<>(9);
                 for (int j = 0; j < 9; j++) {
                     String itemName = DISH_PREFIXES[random.nextInt(DISH_PREFIXES.length)] + " " + DISH_NAMES[random.nextInt(DISH_NAMES.length)];
-                    double rawPrice = 100 + (random.nextDouble() * 400); // 100 to 500
+                    double rawPrice = 100 + (random.nextDouble() * 400);
                     BigDecimal price = new BigDecimal(rawPrice).setScale(0, RoundingMode.HALF_UP);
                     
                     menuItems.add(MenuItem.builder()

@@ -24,7 +24,7 @@ export default function HomePage() {
 
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem' }}>
-      {/* Hero */}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -38,12 +38,12 @@ export default function HomePage() {
         </p>
       </motion.div>
 
-      {/* Results count */}
+
       <p style={{ color: 'var(--muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
         {restaurants.length} restaurants in {location}
       </p>
 
-      {/* Restaurant Grid */}
+
       {loading ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
           {Array.from({ length: 8 }).map((_, i) => (
