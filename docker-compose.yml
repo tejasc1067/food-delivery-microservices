@@ -19,22 +19,6 @@ services:
     networks:
       - foodie-net
 
-  discovery-server:
-    build: ./backend/discovery-server
-    container_name: foodie-discovery
-    expose:
-      - "8761"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://eureka:eureka@localhost:8761/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    networks:
-      - foodie-net
-
   auth-service:
     build: ./backend/auth-service
     container_name: foodie-auth
@@ -44,11 +28,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka:eureka@discovery-server:8761/eureka/
     depends_on:
       postgres:
-        condition: service_healthy
-      discovery-server:
         condition: service_healthy
     networks:
       - foodie-net
@@ -62,11 +43,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/restaurant_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka:eureka@discovery-server:8761/eureka/
     depends_on:
       postgres:
-        condition: service_healthy
-      discovery-server:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
@@ -86,11 +64,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka:eureka@discovery-server:8761/eureka/
     depends_on:
       postgres:
-        condition: service_healthy
-      discovery-server:
         condition: service_healthy
     networks:
       - foodie-net
@@ -104,11 +79,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payment_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka:eureka@discovery-server:8761/eureka/
     depends_on:
       postgres:
-        condition: service_healthy
-      discovery-server:
         condition: service_healthy
     networks:
       - foodie-net
@@ -118,11 +90,7 @@ services:
     container_name: foodie-gateway
     expose:
       - "8080"
-    environment:
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka:eureka@discovery-server:8761/eureka/
     depends_on:
-      discovery-server:
-        condition: service_healthy
       auth-service:
         condition: service_started
       restaurant-service:
