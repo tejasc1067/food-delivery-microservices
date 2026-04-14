@@ -11,11 +11,17 @@ import java.util.List;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
-    @Query("SELECT r FROM Restaurant r WHERE " +
-           "(:query IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :query, '%'))) AND " +
-           "(:city IS NULL OR LOWER(r.city) = LOWER(:city)) AND " +
-           "(:rating IS NULL OR r.rating >= :rating) AND " +
-           "(:cuisine IS NULL OR LOWER(r.cuisineType) = LOWER(:cuisine))")
+    @Query(value = "SELECT * FROM restaurants r WHERE " +
+           "(CAST(:query AS VARCHAR) IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))) AND " +
+           "(CAST(:city AS VARCHAR) IS NULL OR LOWER(r.city) = LOWER(CAST(:city AS VARCHAR))) AND " +
+           "(CAST(:rating AS DECIMAL) IS NULL OR r.rating >= CAST(:rating AS DECIMAL)) AND " +
+           "(CAST(:cuisine AS VARCHAR) IS NULL OR LOWER(r.cuisine_type) = LOWER(CAST(:cuisine AS VARCHAR)))",
+           countQuery = "SELECT COUNT(*) FROM restaurants r WHERE " +
+           "(CAST(:query AS VARCHAR) IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))) AND " +
+           "(CAST(:city AS VARCHAR) IS NULL OR LOWER(r.city) = LOWER(CAST(:city AS VARCHAR))) AND " +
+           "(CAST(:rating AS DECIMAL) IS NULL OR r.rating >= CAST(:rating AS DECIMAL)) AND " +
+           "(CAST(:cuisine AS VARCHAR) IS NULL OR LOWER(r.cuisine_type) = LOWER(CAST(:cuisine AS VARCHAR)))",
+           nativeQuery = true)
     Page<Restaurant> search(@Param("query") String query,
                             @Param("city") String city,
                             @Param("rating") BigDecimal rating,
