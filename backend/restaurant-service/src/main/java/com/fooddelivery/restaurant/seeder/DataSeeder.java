@@ -156,7 +156,6 @@ public class DataSeeder implements CommandLineRunner {
     private int imgIdx = 0;
     private final Random random = new Random(42);
 
-    @Async
     @Override
     @Transactional
     public void run(String... args) {

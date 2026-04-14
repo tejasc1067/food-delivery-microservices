@@ -15,12 +15,12 @@ spring:
             allowCredentials: false
       routes:
         - id: auth-service
-          uri: lb://auth-service
+          uri: http://auth-service:8081
           predicates:
             - Path=/api/auth/**
 
         - id: restaurant-service
-          uri: lb://restaurant-service
+          uri: http://restaurant-service:8082
           predicates:
             - Path=/api/restaurants/**,/api/menu-items/**
           filters:
@@ -35,24 +35,18 @@ spring:
                   factor: 2
 
         - id: order-service
-          uri: lb://order-service
+          uri: http://order-service:8083
           predicates:
             - Path=/api/orders/**
 
         - id: payment-service
-          uri: lb://payment-service
+          uri: http://payment-service:8084
           predicates:
             - Path=/api/payments/**
 
 eureka:
-  instance:
-    lease-renewal-interval-in-seconds: 5
-    lease-expiration-duration-in-seconds: 15
   client:
-    registry-fetch-interval-seconds: 5
-    initial-instance-info-replication-interval-seconds: 5
-    service-url:
-      defaultZone: http://eureka:eureka@localhost:8761/eureka/
+    enabled: false
 
 jwt:
   secret: 4f7a2b9c8d3e1f6a5b0c9d8e7f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0
