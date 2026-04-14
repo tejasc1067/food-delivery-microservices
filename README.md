@@ -19,14 +19,8 @@ graph TD;
         Gateway --> Order[Order Service : 8083];
         Gateway --> Pay[Payment Service : 8084];
         
-        Auth -.-> Eureka((Eureka Discovery Server : 8761));
-        Rest -.-> Eureka;
-        Order -.-> Eureka;
-        Pay -.-> Eureka;
-        Gateway -.-> Eureka;
-        
-        Order -- "Feign Client" --> Rest;
-        Order -- "Feign Client" --> Pay;
+        Order -- "Direct Call" --> Rest;
+        Order -- "Direct Call" --> Pay;
     end
     
     subgraph PostgreSQL Database Container : 5432
@@ -47,11 +41,6 @@ food-delivery-microservices/
 │   └── nginx.conf
 │
 ├── backend/
-│   ├── discovery-server/          ← Service Registry
-│   │   └── src/main/java/.../discovery/
-│   │       ├── DiscoveryServerApplication.java
-│   │       └── config/SecurityConfig.java
-│   │
 │   ├── api-gateway/               ← Gateway + JWT Filter
 │   │   └── src/main/java/.../gateway/
 │   │       ├── ApiGatewayApplication.java
@@ -140,7 +129,6 @@ The application consists of 6 core Java services, 1 frontend, 1 Nginx proxy, and
 | **Restaurant Service** | `8082` | `foodie-restaurant` | Manages restaurant and menu data. |
 | **Order Service** | `8083` | `foodie-order` | Manages orders and cart logic. |
 | **Payment Service** | `8084` | `foodie-payment` | Simulates payment processing. |
-| **Eureka Server** | `8761` | `foodie-discovery` | Registry for service instances. |
 | **PostgreSQL** | `5432` | `foodie-postgres` | Postgres with separate databases for each service. |
 
 ---
@@ -167,13 +155,10 @@ To run components individually:
 - Gradle 8.12
 
 ### 2. Run Backend Services
-Start the Discovery Server first, then the other services, and the API Gateway last.
+Start the services in any order, with the API Gateway being the main entry point.
 
 ```bash
-# Start Eureka
-cd backend/discovery-server && ./gradlew bootRun
-
-# Start services
+# Start individual services
 cd backend/auth-service && ./gradlew bootRun
 cd backend/restaurant-service && ./gradlew bootRun
 cd backend/order-service && ./gradlew bootRun
