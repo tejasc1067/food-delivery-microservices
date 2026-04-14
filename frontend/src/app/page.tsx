@@ -3,22 +3,24 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useLocation } from '@/context/LocationContext';
 import { api } from '@/lib/api';
 import { Restaurant } from '@/lib/types';
 
 export default function HomePage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  const { location } = useLocation();
 
   useEffect(() => {
     setLoading(true);
-    api.get<Restaurant[]>('/api/restaurants')
+    api.get<Restaurant[]>(`/api/restaurants/city/${location}`)
       .then(data => {
         setRestaurants(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [location]);
 
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem' }}>
@@ -32,13 +34,13 @@ export default function HomePage() {
           Discover <span className="gradient-text">Delicious</span> Food
         </h1>
         <p style={{ color: 'var(--muted)', fontSize: '1.1rem' }}>
-          Order from top-rated restaurants near you
+          Order from top-rated restaurants in {location}
         </p>
       </motion.div>
 
       {/* Results count */}
       <p style={{ color: 'var(--muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        {restaurants.length} restaurants available
+        {restaurants.length} restaurants in {location}
       </p>
 
       {/* Restaurant Grid */}

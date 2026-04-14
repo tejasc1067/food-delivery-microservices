@@ -24,6 +24,12 @@ public class RestaurantService {
                 .toList();
     }
 
+    public List<RestaurantResponse> getRestaurantsByCity(String city) {
+        return restaurantRepository.findByCityIgnoreCase(city).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     public RestaurantResponse getRestaurantById(Long id) {
         Restaurant restaurant = restaurantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with id: " + id));

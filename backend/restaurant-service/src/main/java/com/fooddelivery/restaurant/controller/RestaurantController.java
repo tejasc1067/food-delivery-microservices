@@ -22,6 +22,11 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurantService.getAllRestaurants());
     }
 
+    @GetMapping("/city/{city}")
+    public ResponseEntity<List<RestaurantResponse>> getByCity(@PathVariable String city) {
+        return ResponseEntity.ok(restaurantService.getRestaurantsByCity(city));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<RestaurantResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(restaurantService.getRestaurantById(id));

@@ -11,6 +11,8 @@ import java.util.List;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
+    List<Restaurant> findByCityIgnoreCase(String city);
+
     @Query(value = "SELECT * FROM restaurants r WHERE " +
            "(CAST(:query AS VARCHAR) IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))) AND " +
            "(CAST(:city AS VARCHAR) IS NULL OR LOWER(r.city) = LOWER(CAST(:city AS VARCHAR))) AND " +
