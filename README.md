@@ -232,4 +232,3 @@ npm run dev
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/payments` | Process a payment |
-
