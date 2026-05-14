@@ -3,6 +3,7 @@ package com.fooddelivery.payment.service;
 import com.fooddelivery.payment.dto.*;
 import com.fooddelivery.payment.entity.Payment;
 import com.fooddelivery.payment.entity.PaymentStatus;
+import com.fooddelivery.payment.exception.ResourceNotFoundException;
 import com.fooddelivery.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class PaymentService {
 
     public PaymentResponse getPaymentByOrder(Long orderId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for order: " + orderId));
         return toResponse(payment);
     }
 
